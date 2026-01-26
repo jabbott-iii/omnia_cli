@@ -3,11 +3,9 @@ pub mod art;
 
 use owo_colors::OwoColorize;
 
-use crate::art::home_page;
-
 pub fn core_run() {
     
-    println!("{:?}", home_page());
+    println!("{:?}", art::home_page());
 
     loop {
 
