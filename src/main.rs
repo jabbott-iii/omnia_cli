@@ -1,3 +1,3 @@
 fn main() {
-    OmniaCLI::core_run();
+    omnia_cli::core_run();
 }
