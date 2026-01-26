@@ -1,46 +1,101 @@
 use std::{env::current_dir, fs, path::PathBuf};
 use clap::Parser;
+use owo_colors::OwoColorize;
+use strum::Display;
+use chrono::prelude::DateTime;
+use tabled::{Tabled, settings::{Color, Style, object::Columns, object::Rows}};
 
-#[derive(Parser)]
-#[command(version)]
+// Enum to represent file types
+#[derive(Debug, Display)]
+enum FileType {
+    File,
+    Directory, 
+}
 
-struct CLI {
+// Structure to hold file information
+#[derive(Debug, Tabled)]
+struct FileInfo {
+    #[tabled{rename = "Name"}]
+    name: String,
+    #[tabled{rename = "Type"}]
+    path_type: FileType,
+    #[tabled{rename = "Size (bytes)"}]
+    size: u64,
+    #[tabled{rename = "Modified"}]
+    modified: String,
+}
+
+// Command-line interface definition
+#[derive(Debug, Parser)]
+#[command(version, author = "Joseph Abbott III", about = "An all in one CLI tool.")]
+struct Cli {
     path: Option<PathBuf>,
 }
 
 fn main() {
-    let args = CLI::parse();
+    let args = Cli::parse();
     let path = args.path.unwrap_or(PathBuf::from(current_dir().unwrap()));
-    println!("Current path: {}", path.display());
+    println!("Current path: {}", path.display().red());
     if let Ok(does_exist) = fs::exists(&path)  {
         if does_exist {
-            for file in get_files(&path) {
-                println!("{}", file);
-            }
-        } else {
-            println!("{}", "The path does not exist.");
+            get_files_table(&path);
         }
-    } 
-    else {
-            println!("{}", "Could not determine if the path exists.");
-    }
+        } else {
+            println!("{}", "The path does not exist.".red());
+        }
 }
 
-fn get_files(path: &PathBuf) -> Vec<String> {
+// Generate and display a table of files in the specified directory
+fn get_files_table(path: &PathBuf) {
+    let get_files = get_files(&path);
+    let mut table = tabled::Table::new(get_files);
+            table.with(Style::rounded());
+            table.modify(Columns::first(), Color::FG_RED);
+            table.modify(Columns::one(1), Color::FG_RED);
+            table.modify(Columns::one(2), Color::FG_RED);
+            table.modify(Columns::one(3), Color::FG_RED);
+            table.modify(Rows::first(), Color::FG_CYAN);
+    println!("{}", table);
+}
+
+// Retrieve files from the specified directory path
+fn get_files(path: &PathBuf) -> Vec<FileInfo> {
     let mut files = Vec::default();
     if let Ok(read_dir) = fs::read_dir(path) {
         for entry in read_dir {
             if let Ok(file) = entry {
-                files.push(file.file_name()
-                .into_string()
-                .unwrap_or("unkown name".into()),
-                );
+                meta_data(&file, &mut files);
             }
         }
     } else {
-        files.push("Could not read directory.".into());
+        println!("{}", "Could not read the directory.".red());
     } 
     files
+}
+
+// Extract metadata for a given file and append it to the files vector
+fn meta_data(file: &fs::DirEntry, files: &mut Vec<FileInfo>) {
+    if let Ok(meta) = fs::metadata(&file.path()) {
+        files.push(
+            FileInfo {
+                name: file.file_name()
+                      .into_string()
+                      .unwrap_or("unknown name".into()),
+                path_type: if meta.is_dir() {
+                    FileType::Directory
+                } else {
+                    FileType::File
+                },
+                size: meta.len(),
+                modified: DateTime::<chrono::Utc>::from(
+                    meta.modified()
+                    .unwrap_or(std::time::SystemTime::now())
+                 )  
+                    .format("%Y-%m-%d %H:%M:%S")
+                    .to_string(),
+            }
+        );
+     }
 }
 
 /*
@@ -50,19 +105,18 @@ fn get_files(path: &PathBuf) -> Vec<String> {
 | |_| || |  | || |\  | | |   / ___ \ 
  \___/ |_|  |_||_| \_||___| /_/   \_\
 
-               ___     ___
-             .i .-'   `-. i.
-           .'   `/     \'  _`.
-           |,-../ o   o \.' `|
-        (| |   /  _\ /_  \   | |)
-         \\\  (_.'.'"`.`._)  ///
-          \\`._(..:   :..)_.'//
-           \`.__\ .:-:. /__.'/
-            `-i-->.___.<--i-'
-            .'.-'/.=^=.\`-.`.
-           /.'  //     \\  `.\
-          ||   ||       ||   ||
-          \)   ||       ||  (/
-               \)       (/ 
- 
+        ___     ___
+      .i .-'   `-. i.
+    .'   `/     \'  _`.
+    |,-../ o   o \.' `|
+ (| |   /  _\ /_  \   | |)
+  \\\  (_.'.'"`.`._)  ///
+   \\`._(..:   :..)_.'//
+    \`.__\ .:-:. /__.'/
+     `-i-->.___.<--i-'
+     .'.-'/.=^=.\`-.`.
+    /.'  //     \\  `.\
+   ||   ||       ||   ||
+   \)   ||       ||  (/
+        \)       (/ 
  */
