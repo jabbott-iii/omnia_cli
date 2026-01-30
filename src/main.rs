@@ -1,8 +1,11 @@
 pub mod art;
 
-use owo_colors::OwoColorize;
 use clap::Parser;
-use std::path::PathBuf;
+use std::{env::current_dir, fs, path::PathBuf};
+use owo_colors::OwoColorize;
+use strum::Display;
+use chrono::prelude::DateTime;
+use tabled::{Tabled, settings::{Color, Style, object::Columns, object::Rows}};
 
 // Command-line interface definition
 #[derive(Debug, Parser)]
