@@ -21,22 +21,22 @@ fn main() {
     loop {
 
         // Display prompt and read user input
-        println!("{}", "Omnia CLI - Enter a command (type 'exit' to quit):".bright_red());
+        println!("{}", "Omnia CLI - Enter a command (type 'exit' to quit):".bright_green());
         let mut input = String::new();
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
         let command = input.trim();
 
-        if command.eq_ignore_ascii_case("exit") {
+        /*if command.eq_ignore_ascii_case("exit") {
             println!("{}", "Exiting Omnia CLI. Goodbye!".bright_red());
             break;
         }
         match command {
             "ls" => ls_complete(),
             _ => println!("{}", "Unknown command. Please try again.".red()),
-        }
-    }
+        }*/
+    }  
 }
 
 //---------------------------------- LS COMMANDS ----------------------------//
@@ -65,7 +65,7 @@ struct FileInfo {
 fn ls_complete() {
     let args = Cli::parse();
     let path = args.path.unwrap_or(PathBuf::from(current_dir().unwrap()));
-    println!("Current path: {}", path.display().red());
+    println!("Current path: {}", path.display().bright_blue());
     if let Ok(does_exist) = fs::exists(&path)  {
         if does_exist {
             get_files_table(&path);
@@ -80,11 +80,11 @@ fn get_files_table(path: &PathBuf) {
     let get_files = get_files(&path);
     let mut table = tabled::Table::new(get_files);
             table.with(Style::rounded());
-            table.modify(Columns::first(), Color::FG_RED);
-            table.modify(Columns::one(1), Color::FG_RED);
-            table.modify(Columns::one(2), Color::FG_RED);
-            table.modify(Columns::one(3), Color::FG_RED);
-            table.modify(Rows::first(), Color::FG_CYAN);
+            table.modify(Columns::first(), Color::FG_BRIGHT_BLUE);
+            table.modify(Columns::one(1), Color::FG_BRIGHT_BLUE);
+            table.modify(Columns::one(2), Color::FG_BRIGHT_BLUE);
+            table.modify(Columns::one(3), Color::FG_BRIGHT_BLUE);
+            table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
     println!("{}", table);
 }
 
