@@ -28,14 +28,14 @@ fn main() {
             .expect("Failed to read line");
         let command = input.trim();
 
-        /*if command.eq_ignore_ascii_case("exit") {
+        if command.eq_ignore_ascii_case("exit") {
             println!("{}", "Exiting Omnia CLI. Goodbye!".bright_red());
             break;
         }
         match command {
             "ls" => ls_complete(),
             _ => println!("{}", "Unknown command. Please try again.".red()),
-        }*/
+        }
     }  
 }
 
