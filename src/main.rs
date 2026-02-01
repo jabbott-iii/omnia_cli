@@ -33,11 +33,13 @@ fn main() {
             break;
         }
         match command {
-            "ls" => ls::ls_complete(),
+            "ls" => ls_complete(),
             _ => println!("{}", "Unknown command. Please try again.".red()),
         }
     }
 }
+
+//---------------------------------- LS COMMANDS ----------------------------//
 
 // Enum to represent file types
 #[derive(Debug, Display)]
@@ -125,3 +127,6 @@ fn meta_data(file: &fs::DirEntry, files: &mut Vec<FileInfo>) {
         );
      }
 }
+
+
+//---------------------------------- END LS COMMANDS ----------------------------//
