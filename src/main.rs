@@ -1,7 +1,7 @@
 pub mod art;
 
-use clap::Parser;
-use std::{env::current_dir, fs, path::PathBuf};
+use clap::{Parser, Subcommand};
+use std::{env::current_dir, fs, path::PathBuf, env};
 use owo_colors::OwoColorize;
 use strum::Display;
 use chrono::prelude::DateTime;
@@ -9,9 +9,21 @@ use tabled::{Tabled, settings::{Color, Style, object::Columns, object::Rows}};
 
 // Command-line interface definition
 #[derive(Debug, Parser)]
-#[command(version, author = "Joseph Abbott III", about = "An all in one CLI tool.")]
+#[command(version, author = "Joseph Abbott III", about = "Omnia CLI - A versatile command-line interface")]
 pub struct Cli {
     path: Option<PathBuf>,
+    
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    Cd { // Change directory command
+        #[arg(value_name = "DIR")]
+        path: PathBuf,
+    },
+    // Add other commands here (e.g., 'ls', 'mkdir')
 }
 
 fn main() {
@@ -28,6 +40,8 @@ fn main() {
             .expect("Failed to read line");
         let command = input.trim();
 
+        let cli = Cli::parse();
+
         if command.eq_ignore_ascii_case("exit") {
             println!("{}", "Exiting Omnia CLI. Goodbye!".bright_red());
             break;
@@ -36,8 +50,18 @@ fn main() {
             "ls" => ls_complete(),
             _ => println!("{}", "Unknown command. Please try again.".red()),
         }
+        match cli.command {
+            Commands::Cd { path } => {
+                println!("Attempting to change directory to: {:?}", path);
+                match env::set_current_dir(&path) {
+                    Ok(_) => println!("Successfully changed directory."),
+                    Err(e) => {
+                        println!("Error changing directory: {}", e);
+                }
+            }
+        }
     }  
-}
+}}
 
 //---------------------------------- LS COMMANDS ----------------------------//
 
