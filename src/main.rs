@@ -23,6 +23,10 @@ enum Commands {
         #[arg(value_name = "DIR")]
         path: PathBuf,
     },
+    Ls { // List directory contents command
+        #[arg(value_name = "FILES")]
+        path: Option<PathBuf>,
+    },
     // Add other commands here (e.g., 'ls', 'mkdir')
 }
 
@@ -46,22 +50,24 @@ fn main() {
             println!("{}", "Exiting Omnia CLI. Goodbye!".bright_red());
             break;
         }
-        match command {
-            "ls" => ls_complete(),
-            _ => println!("{}", "Unknown command. Please try again.".red()),
-        }
+
         match cli.command {
-            Commands::Cd { path } => {
-                println!("Attempting to change directory to: {:?}", path);
-                match env::set_current_dir(&path) {
-                    Ok(_) => println!("Successfully changed directory."),
-                    Err(e) => {
-                        println!("Error changing directory: {}", e);
+            Commands::Cd { path } => change_directory(path),
+            Commands::Ls { path } => ls_complete(),
+                _ => println!("{}", "Unknown command. Please try again.".red()),
+        }        
+    }
+}
+
+fn change_directory(path: PathBuf) {
+    println!("Attempting to change directory to: {:?}", path);
+        match env::set_current_dir(&path) {
+            Ok(_) => println!("Successfully changed directory."),
+            Err(e) => {
+                println!("Error changing directory: {}", e);
                 }
             }
         }
-    }  
-}}
 
 //---------------------------------- LS COMMANDS ----------------------------//
 
